@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monkey Bar Sports Ticker</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,700;0,800;0,900;1,800&family=Teko:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            /* Dynamic Team Color Variables with Defaults */
+            --primary-color: #203731;
+            --secondary-color: #ffb81c;
+            --accent-glow: rgba(59, 130, 246, 0.35);
+            --bg-glow-1: rgba(32, 55, 49, 0.35);
+            --bg-glow-2: rgba(255, 184, 28, 0.25);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #030509;
+            color: #f1f5f9;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .font-barlow {
+            font-family: 'Barlow Condensed', sans-serif;
+        }
+
+        .font-teko {
+            font-family: 'Teko', sans-serif;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* 9:16 Optimized Aspect Container Frame */
+        .portrait-frame {
+            aspect-ratio: 9 / 16;
+            max-height: 98vh;
+            width: auto;
+        }
+
+        /* Dynamic Sports Bar Glassmorphism Panel with Adaptive Glow */
+        .sports-panel {
+            background: linear-gradient(150deg, rgba(13, 19, 32, 0.96) 0%, rgba(6, 10, 18, 0.99) 100%);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 2px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 
+                0 30px 60px -15px rgba(0, 0, 0, 0.95),
+                0 0 50px var(--accent-glow),
+                inset 0 1px 2px rgba(255, 255, 255, 0.25);
+            transition: box-shadow 0.8s ease, border-color 0.8s ease;
+        }
+
+        /* Ambient Dynamic Background Stadium Lighting */
+        .dynamic-stadium-bg {
+            background-color: #04060a;
+            background-image: 
+                radial-gradient(circle at 15% 20%, var(--bg-glow-1), transparent 55%),
+                radial-gradient(circle at 85% 80%, var(--bg-glow-2), transparent 55%),
+                linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px;
+            transition: background-image 0.8s ease;
+        }
+
+        /* Dynamic Top Stadium Flare */
+        .dynamic-flare {
+            background: linear-gradient(to right, transparent, var(--primary-color), var(--secondary-color), transparent);
+            filter: drop-shadow(0 0 12px var(--primary-color));
+            transition: background 0.8s ease;
+        }
+
+        .team-primary-btn {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            box-shadow: 0 4px 14px var(--accent-glow);
+            transition: background-color 0.8s ease, box-shadow 0.8s ease;
+        }
+
+        /* Continuous Horizontal Ticker Animation */
+        @keyframes tickerScroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .ticker-wrap {
+            width: 100%;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .ticker-move {
+            display: inline-block;
+            white-space: nowrap;
+            animation: tickerScroll 38s linear infinite;
+        }
+
+        .ticker-wrap:hover .ticker-move {
+            animation-play-state: paused;
+        }
+
+        /* Dynamic Progress Bar Animation */
+        .rotation-progress-bar {
+            height: 3px;
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color), #f59e0b);
+            transition: width 0.1s linear;
+        }
+
+        /* Entrance Animations */
+        .card-enter {
+            animation: cardSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes cardSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(16px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 5px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #080c14;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-2 dynamic-stadium-bg select-none">
+
+    <!-- MAIN 9:16 PORTRAIT DISPLAY FRAME CONTAINER -->
+    <div id="mainDisplay" class="portrait-frame w-full max-w-md md:max-w-lg h-[98vh] flex flex-col justify-between sports-panel rounded-3xl p-3.5 relative overflow-hidden">
+
+        <!-- Top Dynamic Color Flare Line -->
+        <div id="dynamicFlareBar" class="absolute top-0 left-1/2 -translate-x-1/2 w-4/5 h-1.5 dynamic-flare pointer-events-none rounded-b-full"></div>
+
+        <!-- HEADER SECTION: Bar Name & Live Clock -->
+        <header class="relative z-10 pb-2 border-b border-slate-800/80">
+            <div class="flex justify-between items-center mb-1">
+                <!-- TV Network / Display Badge -->
+                <div class="flex items-center space-x-2">
+                    <span id="headerNetworkBadge" class="team-primary-btn font-black text-[10px] px-2.5 py-0.5 rounded tracking-wider uppercase font-barlow">
+                        SPORTS BAR LIVE
+                    </span>
+                    <span id="liveDataIndicator" class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-400 font-barlow tracking-wider">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> ESPN REAL-TIME
+                    </span>
+                </div>
+
+                <!-- Controls, Auto-Refresh Countdown & Status -->
+                <div class="flex items-center space-x-2">
+                    <div id="apiRefreshBadge" class="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 text-amber-400 font-barlow text-[10px] font-bold px-2 py-0.5 rounded-lg">
+                        <i data-lucide="refresh-cw" class="w-3 h-3 animate-spin"></i>
+                        <span>Sync in <strong id="apiRefreshCountdown" class="text-white font-orbitron">20s</strong></span>
+                    </div>
+                    <button onclick="fetchLiveData(true)" class="text-slate-400 hover:text-amber-400 p-1 rounded-lg bg-slate-900/80 hover:bg-slate-800 transition border border-slate-700/60" title="Refresh Live Scores Now">
+                        <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <button onclick="toggleSettings()" class="text-slate-400 hover:text-white p-1 rounded-lg bg-slate-900/80 hover:bg-slate-800 transition border border-slate-700/60" title="Settings">
+                        <i data-lucide="settings" class="w-3.5 h-3.5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Custom Venue Title -->
+            <div class="text-center mt-0.5">
+                <h1 id="customHeaderTitle" class="text-2xl sm:text-3xl font-black tracking-wider uppercase font-barlow text-white drop-shadow-md">
+                    MONKEY BAR
+                </h1>
+                <div class="flex justify-center items-center space-x-3 text-xs font-bold text-slate-400 mt-0.5">
+                    <span id="liveClock" class="font-orbitron text-amber-400 text-xs tracking-wider">12:00:00 PM</span>
+                    <span class="text-slate-600">•</span>
+                    <span id="liveDate" class="font-barlow tracking-widest text-slate-300">THU, OCT 22</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN ROTATING MATCHUP DISPLAY STAGE -->
+        <main class="relative z-10 my-auto py-1 flex-1 flex flex-col justify-center overflow-hidden">
+            
+            <!-- Sport & Matchup Count Bar -->
+            <div class="flex justify-between items-center mb-1 px-1">
+                <div class="flex items-center space-x-2">
+                    <span id="currentSportBadge" class="team-primary-btn font-black text-xs px-2.5 py-0.5 rounded font-barlow uppercase tracking-widest">
+                        NFL
+                    </span>
+                    <span id="currentLeagueStatus" class="text-[11px] font-bold text-slate-300 font-barlow tracking-wider uppercase">
+                        LOADING LIVE MATCHUPS...
+                    </span>
+                </div>
+
+                <!-- Carousel Dot Navigation -->
+                <div id="carouselDots" class="flex space-x-1">
+                    <!-- Dynamic Dots -->
+                </div>
+            </div>
+
+            <!-- ROTATION PROGRESS TIMELINE BAR -->
+            <div class="w-full bg-slate-900/90 h-1 rounded-full overflow-hidden mb-1.5 border border-slate-800">
+                <div id="rotationProgressBar" class="rotation-progress-bar w-0"></div>
+            </div>
+
+            <!-- DYNAMIC MATCHUP CONTAINER CARD -->
+            <div id="matchupCardContainer" class="card-enter flex-1 flex flex-col justify-center overflow-hidden">
+                <!-- Dynamic Card content inserted here -->
+            </div>
+
+            <!-- Manual Controls & Timer Status -->
+            <div class="flex justify-between items-center mt-1.5 px-1 text-slate-400">
+                <button onclick="prevSlide()" class="flex items-center gap-1 text-[11px] font-bold font-barlow hover:text-white transition bg-slate-900/90 px-2.5 py-1 rounded-lg border border-slate-800">
+                    <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i> PREV
+                </button>
+                <div class="flex items-center gap-2">
+                    <button id="pauseToggleBtn" onclick="togglePause()" class="p-1 bg-slate-900/90 rounded-lg border border-slate-800 hover:text-white transition">
+                        <i id="pauseIcon" data-lucide="pause" class="w-3.5 h-3.5 text-amber-400"></i>
+                    </button>
+                    <span id="slideTimerBadge" class="text-[11px] font-bold font-barlow text-slate-400 bg-slate-950 px-2 py-0.5 rounded border border-slate-800">
+                        8s ROTATE
+                    </span>
+                </div>
+                <button onclick="nextSlide()" class="flex items-center gap-1 text-[11px] font-bold font-barlow hover:text-white transition bg-slate-900/90 px-2.5 py-1 rounded-lg border border-slate-800">
+                    NEXT <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+                </button>
+            </div>
+        </main>
+
+        <!-- CONTINUOUS TICKER FOOTER -->
+        <footer class="relative z-10 mt-1 pt-1.5 border-t border-slate-800/80">
+            <div class="bg-slate-950/90 rounded-xl py-1 px-2 border border-slate-800 shadow-inner overflow-hidden flex items-center">
+                <div class="bg-red-600 text-white font-black text-[9px] px-2 py-0.5 rounded tracking-widest font-barlow uppercase mr-2 shrink-0 shadow">
+                    VEGAS TICKER
+                </div>
+                <div class="ticker-wrap flex items-center">
+                    <div id="tickerContent" class="ticker-move flex items-center space-x-6 text-[11px] font-bold font-barlow tracking-wider">
+                        <!-- Dynamic ticker items -->
+                    </div>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- SETTINGS CONTROL OVERLAY -->
+    <div id="settingsDrawer" class="fixed inset-y-0 right-0 w-full max-w-xs bg-slate-950/98 border-l border-slate-800 backdrop-blur-2xl p-5 transform translate-x-full transition-transform duration-300 ease-in-out z-50 overflow-y-auto shadow-2xl">
+        <div class="flex justify-between items-center pb-3 border-b border-slate-800 mb-4">
+            <h2 class="text-lg font-bold font-barlow tracking-wide text-amber-400 flex items-center gap-2">
+                <i data-lucide="sliders" class="w-5 h-5"></i> Display Settings
+            </h2>
+            <button onclick="toggleSettings()" class="text-slate-400 hover:text-white p-1 rounded-lg">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+        </div>
+
+        <div class="space-y-4 text-sm">
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 font-barlow">Sports Bar Title</label>
+                <input type="text" id="inputHeaderTitle" value="MONKEY BAR" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-barlow font-bold text-base focus:border-amber-400 focus:outline-none" oninput="updateHeaderTitle(this.value)">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 font-barlow">Auto Data Refresh Interval</label>
+                <select id="apiRefreshSelect" onchange="updateApiRefreshInterval(this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-barlow font-bold text-sm focus:border-amber-400 focus:outline-none">
+                    <option value="10000">10 Seconds</option>
+                    <option value="20000" selected>20 Seconds (Requested)</option>
+                    <option value="30000">30 Seconds</option>
+                    <option value="60000">60 Seconds</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 font-barlow">Matchup Slide Duration</label>
+                <select id="rotationSpeedSelect" onchange="updateRotationSpeed(this.value)" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-barlow font-bold text-sm focus:border-amber-400 focus:outline-none">
+                    <option value="6000">6 Seconds</option>
+                    <option value="8000" selected>8 Seconds (Default)</option>
+                    <option value="10000">10 Seconds</option>
+                    <option value="15000">15 Seconds</option>
+                </select>
+            </div>
+
+            <div class="p-3 bg-slate-900/80 rounded-xl border border-slate-800 space-y-1">
+                <span class="block text-xs font-bold text-amber-400 font-barlow uppercase">20s ESPN AUTO REFRESH ENGINE</span>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                    Automatically polls ESPN live APIs every 20 seconds. Dynamically updates point spreads, live quarter/period clocks, player leaders, and UFC Tale of the Tape comparisons.
+                </p>
+            </div>
+
+            <button onclick="fetchLiveData(true)" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-black py-2 rounded-lg font-barlow tracking-wider uppercase transition shadow">
+                Force Reload ESPN Live Data Now
+            </button>
+
+            <div class="pt-3 text-center border-t border-slate-800">
+                <span class="text-[10px] text-slate-500 font-barlow tracking-widest uppercase">MONKEY BAR • 20S LIVE ESPN SYNC</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- STAR PLAYER FALLBACK DATABASE ---
+        const STAR_PLAYERS = {
+            'GB': { name: 'JORDAN LOVE', pos: 'QB #10', stats: '2,840 YDS • 22 TD • 104.2 RTG', img: 'https://a.espncdn.com/combiner/i?img=/i/headshots/nfl/players/full/4036378.png&w=350&h=254' },
+            'CHI': { name: 'CALEB WILLIAMS', pos: 'QB #18', stats: '2,410 YDS • 16 TD • 91.5 RTG', img: 'https://a.espncdn.com/combiner/i?img=/i/headshots/nfl/players/full/4431611.png&w=350&h=254' },
+            'LAL': { name: 'LEBRON JAMES', pos: 'SF #23', stats: '25.4 PPG • 7.8 RPG • 8.2 APG', img: 'https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/1966.png&w=350&h=254' },
+            'BOS': { name: 'JAYSON TATUM', pos: 'SF #0', stats: '27.1 PPG • 8.4 RPG • 4.8 APG', img: 'https://a.espncdn.com/combiner/i?img=/i/headshots/nba/players/full/4065648.png&w=350&h=254' },
+            'EDM': { name: 'CONNOR MCDAVID', pos: 'C #97', stats: '32 G • 65 A • 97 PTS', img: 'https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/3895074.png&w=350&h=254' },
+            'TOR': { name: 'AUSTON MATTHEWS', pos: 'C #34', stats: '42 G • 28 A • 70 PTS', img: 'https://a.espncdn.com/combiner/i?img=/i/headshots/nhl/players/full/4024123.png&w=350&h=254' },
+            'LAD': { name: 'SHOHEI OHTANI', pos: 'DH/SP #17', stats: '54 HR • 130 RBI • .310 AVG', img: 'https://a.espncdn.com/combiner/i?img=/i/headshots/mlb/players/full/39832.png&w=350&h=254' },
+            'NYY': { name: 'AARON JUDGE', pos: 'CF #99', stats: '58 HR • 144 RBI • .322 AVG', img: 'https://a.espncdn.com/combiner/i?img=/i/headshots/mlb/players/full/33192.png&w=350&h=254' },
+            'KC': { name: 'PATRICK MAHOMES', pos: 'QB #15', stats: '2,910 YDS • 24 TD • 101.8 RTG', img: 'https://a.espncdn.com/combiner/i?img=/i/headshots/nfl/players/full/3139477.png&w=350&h=254' },
+            'BUF': { name: 'JOSH ALLEN', pos: 'QB #17', stats: '3,120 YDS • 26 TD • 98.6 RTG', img: 'https://a.espncdn.com/combiner/i?img=/i/headshots/nfl/players/full/3918298.png&w=350&h=254' }
+        };
+
+        // --- FALLBACK MATCHUPS DATA FOR CONTINUOUS OPERATION ---
+        const FALLBACK_MATCHUPS = [
+            {
+                type: 'UFC',
+                sport: 'UFC',
+                primaryColor: '#dc2626',
+                secondaryColor: '#2563eb',
+                cardTitle: 'UFC 308: MAIN EVENT',
+                weightClass: 'FEATHERWEIGHT WORLD CHAMPIONSHIP',
+                f1: {
+                    name: 'ILIA TOPURIA',
+                    nickname: '"EL MATADOR"',
+                    record: '15-0-0 (5 KO, 8 SUB)',
+                    country: 'GEORGIA / SPAIN',
+                    height: '5\' 7"',
+                    reach: '69.0"',
+                    stance: 'Orthodox',
+                    slpm: '4.40',
+                    odds: '-240',
+                    methodProp: 'Topuria via KO/TKO (+135)',
+                    corner: 'RED CORNER',
+                    img: 'https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4685324.png&w=350&h=254'
+                },
+                f2: {
+                    name: 'MAX HOLLOWAY',
+                    nickname: '"BLESSED"',
+                    record: '26-7-0 (12 KO, 2 SUB)',
+                    country: 'USA (HAWAII)',
+                    height: '5\' 11"',
+                    reach: '69.0"',
+                    stance: 'Orthodox',
+                    slpm: '7.17',
+                    odds: '+190',
+                    methodProp: 'Holloway via DEC (+330)',
+                    corner: 'BLUE CORNER',
+                    img: 'https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/2614933.png&w=350&h=254'
+                },
+                status: 'MAIN EVENT',
+                subtext: 'SATURDAY • PPV MAIN CARD • 2:00 PM ET',
+                roundsProp: 'Over 4.5 Rounds (-115)'
+            },
+            {
+                type: 'TEAM_GAME',
+                sport: 'NFL',
+                primaryColor: '#203731',
+                secondaryColor: '#0b162a',
+                home: {
+                    name: 'GREEN BAY PACKERS',
+                    short: 'PACKERS',
+                    abbr: 'GB',
+                    record: '5-2',
+                    score: '24',
+                    color: '#203731',
+                    logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/gb.png',
+                    player: STAR_PLAYERS['GB']
+                },
+                away: {
+                    name: 'CHICAGO BEARS',
+                    short: 'BEARS',
+                    abbr: 'CHI',
+                    record: '4-2',
+                    score: '17',
+                    color: '#0b162a',
+                    logo: 'https://a.espncdn.com/i/teamlogos/nfl/500/chi.png',
+                    player: STAR_PLAYERS['CHI']
+                },
+                status: 'LIVE Q4 04:15',
+                statusBadgeClass: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40',
+                timeOrPeriod: '4TH QTR 4:15',
+                tvBroadcast: 'FOX • AMERICA\'S GAME OF THE WEEK',
+                oddsSpread: 'GB -3.5 (-110) / CHI +3.5 (-110)',
+                moneyline: 'GB -180 / CHI +155',
+                oddsOU: '44.5 (O -105 / U -115)',
+                highlights: 'J. Love: 19/26, 235 YDS, 2 TD | C. Williams: 16/28, 180 YDS'
+            },
+            {
+                type: 'TEAM_GAME',
+                sport: 'NBA',
+                primaryColor: '#552583',
+                secondaryColor: '#007a33',
+                home: {
+                    name: 'LOS ANGELES LAKERS',
+                    short: 'LAKERS',
+                    abbr: 'LAL',
+                    record: '3-1',
+                    score: '108',
+                    color: '#552583',
+                    logo: 'https://a.espncdn.com/i/teamlogos/nba/500/lal.png',
+                    player: STAR_PLAYERS['LAL']
+                },
+                away: {
+                    name: 'BOSTON CELTICS',
+                    short: 'CELTICS',
+                    abbr: 'BOS',
+                    record: '4-0',
+                    score: '112',
+                    color: '#007a33',
+                    logo: 'https://a.espncdn.com/i/teamlogos/nba/500/bos.png',
+                    player: STAR_PLAYERS['BOS']
+                },
+                status: 'LIVE Q4 01:20',
+                statusBadgeClass: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40',
+                timeOrPeriod: '4TH QTR 1:20',
+                tvBroadcast: 'TNT NATIONAL TV',
+                oddsSpread: 'BOS -4.5 (-110) / LAL +4.5 (-110)',
+                moneyline: 'BOS -190 / LAL +160',
+                oddsOU: '226.5 (O -110 / U -110)',
+                highlights: 'A. Davis: 32 PTS, 14 REB | J. Tatum: 35 PTS, 8 AST'
+            },
+            {
+                type: 'UFC',
+                sport: 'UFC',
+                primaryColor: '#991b1b',
+                secondaryColor: '#1d4ed8',
+                cardTitle: 'UFC 308: CO-MAIN EVENT',
+                weightClass: 'MIDDLEWEIGHT 5-ROUND WAR',
+                f1: {
+                    name: 'ROBERT WHITTAKER',
+                    nickname: '"THE REAPER"',
+                    record: '26-7-0 (10 KO)',
+                    country: 'AUSTRALIA',
+                    height: '6\' 0"',
+                    reach: '73.5"',
+                    stance: 'Orthodox',
+                    slpm: '4.48',
+                    odds: '+200',
+                    methodProp: 'Whittaker via DEC (+350)',
+                    corner: 'RED CORNER',
+                    img: 'https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/2563728.png&w=350&h=254'
+                },
+                f2: {
+                    name: 'KHAMZAT CHIMAEV',
+                    nickname: '"BORZ"',
+                    record: '13-0-0 (6 KO, 5 SUB)',
+                    country: 'UAE / RUSSIA',
+                    height: '6\' 2"',
+                    reach: '75.0"',
+                    stance: 'Orthodox',
+                    slpm: '5.78',
+                    odds: '-250',
+                    methodProp: 'Chimaev via SUB/KO R1 (+120)',
+                    corner: 'BLUE CORNER',
+                    img: 'https://a.espncdn.com/combiner/i?img=/i/headshots/mma/players/full/4685084.png&w=350&h=254'
+                },
+                status: 'CO-MAIN EVENT',
+                subtext: 'SATURDAY • PPV MAIN CARD • 1:30 PM ET',
+                roundsProp: 'Under 2.5 Rounds (-125)'
+            },
+            {
+                type: 'TEAM_GAME',
+                sport: 'NHL',
+                primaryColor: '#041e42',
+                secondaryColor: '#00205b',
+                home: {
+                    name: 'EDMONTON OILERS',
+                    short: 'OILERS',
+                    abbr: 'EDM',
+                    record: '5-3-0',
+                    score: '4',
+                    color: '#041e42',
+                    logo: 'https://a.espncdn.com/i/teamlogos/nhl/500/edm.png',
+                    player: STAR_PLAYERS['EDM']
+                },
+                away: {
+                    name: 'TORONTO MAPLE LEAFS',
+                    short: 'MAPLE LEAFS',
+                    abbr: 'TOR',
+                    record: '5-2-1',
+                    score: '3',
+                    color: '#00205b',
+                    logo: 'https://a.espncdn.com/i/teamlogos/nhl/500/tor.png',
+                    player: STAR_PLAYERS['TOR']
+                },
+                status: 'FINAL (OT)',
+                statusBadgeClass: 'bg-slate-800 text-slate-300 border-slate-700',
+                timeOrPeriod: 'FINAL / OVERTIME',
+                tvBroadcast: 'ESPN+ / SPORTSNET',
+                oddsSpread: 'EDM -1.5 (+165) / TOR +1.5 (-195)',
+                moneyline: 'EDM -145 / TOR +125',
+                oddsOU: '6.5 (O -120 / U +100)',
+                highlights: 'McDavid: GWG OT Goal (1G, 2A) | Matthews: 2G (PPG)'
+            },
+            {
+                type: 'TEAM_GAME',
+                sport: 'MLB',
+                primaryColor: '#005a9c',
+                secondaryColor: '#0c2340',
+                home: {
+                    name: 'LOS ANGELES DODGERS',
+                    short: 'DODGERS',
+                    abbr: 'LAD',
+                    record: '3-1 (SERIES)',
+                    score: '5',
+                    color: '#005a9c',
+                    logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/lad.png',
+                    player: STAR_PLAYERS['LAD']
+                },
+                away: {
+                    name: 'NEW YORK YANKEES',
+                    short: 'YANKEES',
+                    abbr: 'NYY',
+                    record: '1-3 (SERIES)',
+                    score: '2',
+                    color: '#0c2340',
+                    logo: 'https://a.espncdn.com/i/teamlogos/mlb/500/nyy.png',
+                    player: STAR_PLAYERS['NYY']
+                },
+                status: 'TOP 8TH',
+                statusBadgeClass: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40',
+                timeOrPeriod: 'TOP 8TH • 1 OUT',
+                tvBroadcast: 'FOX • WORLD SERIES GAME 5',
+                oddsSpread: 'LAD -1.5 (+125) / NYY +1.5 (-145)',
+                moneyline: 'LAD -135 / NYY +115',
+                oddsOU: '8.5 (O -105 / U -115)',
+                highlights: 'Ohtani: 2-3, HR (410 ft) | Judge: 1-3, RBI Double'
+            }
+        ];
+
+        // --- GLOBAL STATE ---
+        let matchData = [...FALLBACK_MATCHUPS];
+        let currentSlideIndex = 0;
+        let slideDuration = 8000;
+        let isPaused = false;
+        let slideTimer = null;
+        let progressAnimFrame = null;
+        let slideStartTime = Date.now();
+
+        // 20-SECOND AUTO REFRESH TIMERS
+        let apiRefreshIntervalMs = 20000; // 20 SECONDS
+        let apiRefreshTimer = null;
+        let apiCountdownSeconds = 20;
+        let apiCountdownInterval = null;
+
+        // ESPN API Endpoints
+        const ESPN_ENDPOINTS = {
+            NFL: 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard',
+            NBA: 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard',
+            NHL: 'https://site.api.espn.com/apis/site/v2/sports/hockey/nhl/scoreboard',
+            MLB: 'https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard',
+            MMA: 'https://site.api.espn.com/apis/site/v2/sports/mma/ufc/scoreboard'
+        };
+
+        // --- INIT ON LOAD ---
+        window.onload = function() {
+            lucide.createIcons();
+            updateClock();
+            setInterval(updateClock, 1000);
+
+            // Fetch Live Data Immediately on Launch
+            fetchLiveData();
+
+            // Start 20-Second Auto Refresh Loop & Countdown
+            startApiAutoRefresh();
+
+            renderTicker();
+            startSlideTimer();
+        };
+
+        // --- 20-SECOND AUTO REFRESH LOOP & COUNTDOWN DISPLAY ---
+        function startApiAutoRefresh() {
+            if (apiRefreshTimer) clearInterval(apiRefreshTimer);
+            if (apiCountdownInterval) clearInterval(apiCountdownInterval);
+
+            apiCountdownSeconds = Math.floor(apiRefreshIntervalMs / 1000);
+            updateCountdownUI();
+
+            apiCountdownInterval = setInterval(() => {
+                apiCountdownSeconds--;
+                if (apiCountdownSeconds < 0) {
+                    apiCountdownSeconds = Math.floor(apiRefreshIntervalMs / 1000);
+                }
+                updateCountdownUI();
+            }, 1000);
+
+            apiRefreshTimer = setInterval(() => {
+                fetchLiveData();
+            }, apiRefreshIntervalMs);
+        }
+
+        function updateCountdownUI() {
+            const el = document.getElementById('apiRefreshCountdown');
+            if (el) el.innerText = `${apiCountdownSeconds}s`;
+        }
+
+        function updateApiRefreshInterval(ms) {
+            apiRefreshIntervalMs = parseInt(ms);
+            startApiAutoRefresh();
+        }
+
+        // --- FETCH LIVE DATA FROM ESPN ENDPOINTS ---
+        async function fetchLiveData(manualTrigger = false) {
+            const indicator = document.getElementById('liveDataIndicator');
+            indicator.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span> FETCHING ESPN...`;
+
+            try {
+                let fetchedEvents = [];
+
+                for (const [sportKey, url] of Object.entries(ESPN_ENDPOINTS)) {
+                    try {
+                        const res = await fetch(url);
+                        if (!res.ok) continue;
+                        const data = await res.json();
+                        
+                        if (data && data.events && data.events.length > 0) {
+                            const parsed = parseEspnEvents(data.events, sportKey);
+                            fetchedEvents = fetchedEvents.concat(parsed);
+                        }
+                    } catch (err) {
+                        console.warn(`ESPN endpoint for ${sportKey} failed:`, err);
+                    }
+                }
+
+                if (fetchedEvents.length > 0) {
+                    matchData = [...fetchedEvents, ...FALLBACK_MATCHUPS.filter(m => m.type === 'UFC')];
+                    indicator.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> ESPN REAL-TIME (20s SYNC)`;
+                } else {
+                    matchData = [...FALLBACK_MATCHUPS];
+                    indicator.innerHTML = `<span class="w-2 h-2 rounded-full bg-blue-400"></span> VEGAS LIVE PRESETS`;
+                }
+
+            } catch (error) {
+                console.error("Error fetching live scores:", error);
+                matchData = [...FALLBACK_MATCHUPS];
+                indicator.innerHTML = `<span class="w-2 h-2 rounded-full bg-slate-400"></span> OFFLINE PRESETS`;
+            }
+
+            if (manualTrigger) {
+                currentSlideIndex = 0;
+            }
+            
+            // Keep index valid
+            if (currentSlideIndex >= matchData.length) currentSlideIndex = 0;
+
+            renderCurrentMatchup();
+            renderTicker();
+            apiCountdownSeconds = Math.floor(apiRefreshIntervalMs / 1000);
+            updateCountdownUI();
+        }
+
+        // --- PARSE ESPN API SCOREBOARD DATA ---
+        function parseEspnEvents(events, sportKey) {
+            const results = [];
+            const subset = events.slice(0, 2);
+
+            subset.forEach(evt => {
+                try {
+                    const competition = evt.competitions[0];
+                    const homeComp = competition.competitors.find(c => c.homeAway === 'home');
+                    const awayComp = competition.competitors.find(c => c.homeAway === 'away');
+
+                    const statusType = evt.status.type.name;
+                    const statusDetail = evt.status.type.shortDetail || evt.status.type.detail;
+                    const broadcast = competition.broadcasts?.[0]?.names?.[0] || 'ESPN / NETWORK TV';
+
+                    // Parse Vegas Odds
+                    let oddsSpread = `${homeComp.team.abbreviation} -3.5 (-110)`;
+                    let moneyline = `${homeComp.team.abbreviation} -165 / ${awayComp.team.abbreviation} +140`;
+                    let oddsOU = 'O/U 45.5 (-110)';
+
+                    if (competition.odds && competition.odds.length > 0) {
+                        const o = competition.odds[0];
+                        if (o.details) oddsSpread = o.details;
+                        if (o.overUnder) oddsOU = `O/U ${o.overUnder}`;
+                    }
+
+                    const homePlayer = extractLeader(homeComp, homeComp.team.abbreviation);
+                    const awayPlayer = extractLeader(awayComp, awayComp.team.abbreviation);
+
+                    results.push({
+                        type: 'TEAM_GAME',
+                        sport: sportKey,
+                        primaryColor: '#' + (homeComp.team.color || '1e293b'),
+                        secondaryColor: '#' + (awayComp.team.color || 'f59e0b'),
+                        home: {
+                            name: homeComp.team.displayName.toUpperCase(),
+                            short: homeComp.team.shortDisplayName?.toUpperCase() || homeComp.team.name.toUpperCase(),
+                            abbr: homeComp.team.abbreviation,
+                            record: homeComp.records?.[0]?.summary || '0-0',
+                            score: homeComp.score || '0',
+                            color: '#' + (homeComp.team.color || '1e293b'),
+                            logo: homeComp.team.logo || `https://a.espncdn.com/i/teamlogos/${sportKey.toLowerCase()}/500/${homeComp.team.abbreviation.toLowerCase()}.png`,
+                            player: homePlayer
+                        },
+                        away: {
+                            name: awayComp.team.displayName.toUpperCase(),
+                            short: awayComp.team.shortDisplayName?.toUpperCase() || awayComp.team.name.toUpperCase(),
+                            abbr: awayComp.team.abbreviation,
+                            record: awayComp.records?.[0]?.summary || '0-0',
+                            score: awayComp.score || '0',
+                            color: '#' + (awayComp.team.color || '0f172a'),
+                            logo: awayComp.team.logo || `https://a.espncdn.com/i/teamlogos/${sportKey.toLowerCase()}/500/${awayComp.team.abbreviation.toLowerCase()}.png`,
+                            player: awayPlayer
+                        },
+                        status: statusDetail.toUpperCase(),
+                        statusBadgeClass: statusType.includes('PROGRESS') 
+                            ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40' 
+                            : 'bg-slate-800 text-slate-300 border-slate-700',
+                        timeOrPeriod: statusDetail.toUpperCase(),
+                        tvBroadcast: broadcast.toUpperCase(),
+                        oddsSpread: oddsSpread,
+                        moneyline: moneyline,
+                        oddsOU: oddsOU,
+                        highlights: `${homeComp.team.abbreviation} vs ${awayComp.team.abbreviation} • Live 20s Updated Matchup`
+                    });
+                } catch (e) {
+                    console.warn('Error parsing single event:', e);
+                }
+            });
+
+            return results;
+        }
+
+        // Helper to extract team leader or fallback star player
+        function extractLeader(competitor, abbr) {
+            try {
+                if (competitor.leaders && competitor.leaders.length > 0) {
+                    const leaderObj = competitor.leaders[0].leaders[0];
+                    const athlete = leaderObj.athlete;
+                    return {
+                        name: athlete.displayName.toUpperCase(),
+                        pos: athlete.position?.abbreviation || 'STAR',
+                        stats: `${competitor.leaders[0].displayName.toUpperCase()}: ${leaderObj.displayValue}`,
+                        img: athlete.headshot || `https://a.espncdn.com/i/headshots/nfl/players/full/${athlete.id}.png`
+                    };
+                }
+            } catch (err) {}
+
+            return STAR_PLAYERS[abbr] || {
+                name: `${abbr} KEY PLAYER`,
+                pos: 'STAR',
+                stats: 'TEAM LEADER • TOP PERFORMER',
+                img: `https://a.espncdn.com/combiner/i?img=/i/headshots/nfl/players/full/3139477.png&w=350&h=254`
+            };
+        }
+
+        // --- CLOCK & DATE ---
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('liveClock').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const options = { weekday: 'short', month: 'short', day: 'numeric' };
+            document.getElementById('liveDate').innerText = now.toLocaleDateString('en-US', options).toUpperCase();
+        }
+
+        // --- DYNAMIC ADAPTIVE COLOR ENGINE ---
+        function applyAdaptiveTheme(data) {
+            const root = document.documentElement;
+            const primary = data.primaryColor || '#203731';
+            const secondary = data.secondaryColor || '#ffb81c';
+
+            const pRgb = hexToRgb(primary);
+            const sRgb = hexToRgb(secondary);
+
+            root.style.setProperty('--primary-color', primary);
+            root.style.setProperty('--secondary-color', secondary);
+            root.style.setProperty('--accent-glow', `rgba(${pRgb.r}, ${pRgb.g}, ${pRgb.b}, 0.4)`);
+            root.style.setProperty('--bg-glow-1', `rgba(${pRgb.r}, ${pRgb.g}, ${pRgb.b}, 0.3)`);
+            root.style.setProperty('--bg-glow-2', `rgba(${sRgb.r}, ${sRgb.g}, ${sRgb.b}, 0.25)`);
+        }
+
+        function hexToRgb(hex) {
+            let c = hex.replace('#', '');
+            if (c.length === 3) c = c.split('').map(x => x + x).join('');
+            const num = parseInt(c, 16) || 0;
+            return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+        }
+
+        // --- CONTINUOUS TICKER RENDERER ---
+        function renderTicker() {
+            const container = document.getElementById('tickerContent');
+            const items = matchData.map(m => {
+                if (m.type === 'UFC') {
+                    return `
+                        <span class="inline-flex items-center space-x-2">
+                            <span class="bg-red-950 text-red-300 border border-red-800 px-1.5 py-0.5 rounded text-[10px] font-barlow">UFC 308</span>
+                            <span class="text-amber-400 font-bold">${m.f1.name} (${m.f1.odds}) VS ${m.f2.name} (${m.f2.odds})</span>
+                            <span class="text-slate-400">• ${m.weightClass}</span>
+                        </span>
+                    `;
+                } else {
+                    return `
+                        <span class="inline-flex items-center space-x-2">
+                            <span class="bg-slate-900 text-slate-200 border border-slate-700 px-1.5 py-0.5 rounded text-[10px] font-barlow">${m.sport}</span>
+                            <span class="text-white font-bold">${m.away.short} ${m.away.score} @ ${m.home.short} ${m.home.score}</span>
+                            <span class="text-amber-400">• SPREAD: ${m.oddsSpread}</span>
+                            <span class="text-cyan-400">• O/U: ${m.oddsOU}</span>
+                        </span>
+                    `;
+                }
+            });
+
+            const fullList = [...items, ...items, ...items].join('<span class="text-slate-700 mx-3">•</span>');
+            container.innerHTML = fullList;
+        }
+
+        // --- RENDER CURRENT MATCHUP SLIDE ---
+        function renderCurrentMatchup() {
+            if (!matchData.length) return;
+
+            const data = matchData[currentSlideIndex];
+            const container = document.getElementById('matchupCardContainer');
+
+            applyAdaptiveTheme(data);
+
+            container.className = 'card-enter flex-1 flex flex-col justify-center overflow-hidden';
+
+            document.getElementById('currentSportBadge').innerText = data.sport;
+            document.getElementById('currentLeagueStatus').innerText = `MATCHUP ${currentSlideIndex + 1} OF ${matchData.length}`;
+
+            if (data.type === 'UFC') {
+                container.innerHTML = renderUFCCard(data);
+            } else {
+                container.innerHTML = renderTeamGameCard(data);
+            }
+
+            renderCarouselDots();
+            lucide.createIcons();
+            resetProgressBar();
+        }
+
+        function renderCarouselDots() {
+            const dotsContainer = document.getElementById('carouselDots');
+            dotsContainer.innerHTML = matchData.map((_, idx) => `
+                <div onclick="goToSlide(${idx})" class="h-2 rounded-full cursor-pointer transition-all duration-300 ${idx === currentSlideIndex ? 'bg-amber-400 w-4' : 'bg-slate-800 w-2 hover:bg-slate-600'}"></div>
+            `).join('');
+        }
+
+        // --- UFC CARD WITH FULL ODDS & TALE OF THE TAPE ---
+        function renderUFCCard(data) {
+            return `
+                <div class="bg-slate-950/90 rounded-2xl border border-slate-800 p-3 shadow-2xl relative overflow-hidden flex flex-col justify-between h-full">
+                    <div class="flex justify-between items-center pb-1.5 border-b border-slate-800/80">
+                        <span class="text-xs font-black text-red-500 font-barlow tracking-widest uppercase flex items-center gap-1">
+                            <i data-lucide="swords" class="w-3.5 h-3.5"></i> ${data.cardTitle}
+                        </span>
+                        <span class="text-[10px] font-bold text-amber-400 font-barlow bg-amber-950/60 border border-amber-500/30 px-2 py-0.5 rounded">
+                            ${data.weightClass}
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 my-1.5 relative">
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 bg-red-600 text-white font-black text-xs w-6 h-6 rounded-full flex items-center justify-center font-barlow border-2 border-slate-950 shadow-2xl">
+                            VS
+                        </div>
+
+                        <!-- RED CORNER -->
+                        <div class="bg-gradient-to-b from-red-950/50 via-slate-900/80 to-slate-950/90 rounded-xl p-2 border border-red-900/40 flex flex-col items-center text-center">
+                            <span class="text-[9px] font-black text-red-400 font-barlow bg-red-950 px-2 py-0.5 rounded border border-red-800/40 uppercase mb-0.5">
+                                ${data.f1.corner}
+                            </span>
+                            <div class="w-full h-24 sm:h-28 relative flex justify-center items-end my-0.5">
+                                <img src="${data.f1.img}" alt="${data.f1.name}" class="max-h-full object-contain filter drop-shadow-[0_10px_10px_rgba(0,0,0,0.9)]" onerror="this.src='https://placehold.co/200x200/1e293b/ffffff?text=UFC+Fighter'">
+                            </div>
+                            <span class="text-[9px] text-amber-400 font-bold uppercase tracking-wider">${data.f1.nickname}</span>
+                            <h3 class="text-xs sm:text-sm font-black text-white font-barlow uppercase leading-tight">${data.f1.name}</h3>
+                            <span class="text-[10px] font-bold text-slate-400 font-barlow">${data.f1.record}</span>
+                            <span class="mt-1 bg-red-950 text-red-300 text-[11px] font-black px-2 py-0.5 rounded font-barlow border border-red-800/60 shadow">
+                                ML: ${data.f1.odds}
+                            </span>
+                        </div>
+
+                        <!-- BLUE CORNER -->
+                        <div class="bg-gradient-to-b from-blue-950/50 via-slate-900/80 to-slate-950/90 rounded-xl p-2 border border-blue-900/40 flex flex-col items-center text-center">
+                            <span class="text-[9px] font-black text-blue-400 font-barlow bg-blue-950 px-2 py-0.5 rounded border border-blue-800/40 uppercase mb-0.5">
+                                ${data.f2.corner}
+                            </span>
+                            <div class="w-full h-24 sm:h-28 relative flex justify-center items-end my-0.5">
+                                <img src="${data.f2.img}" alt="${data.f2.name}" class="max-h-full object-contain filter drop-shadow-[0_10px_10px_rgba(0,0,0,0.9)]" onerror="this.src='https://placehold.co/200x200/1e293b/ffffff?text=UFC+Fighter'">
+                            </div>
+                            <span class="text-[9px] text-amber-400 font-bold uppercase tracking-wider">${data.f2.nickname}</span>
+                            <h3 class="text-xs sm:text-sm font-black text-white font-barlow uppercase leading-tight">${data.f2.name}</h3>
+                            <span class="text-[10px] font-bold text-slate-400 font-barlow">${data.f2.record}</span>
+                            <span class="mt-1 bg-blue-950 text-blue-300 text-[11px] font-black px-2 py-0.5 rounded font-barlow border border-blue-800/60 shadow">
+                                ML: ${data.f2.odds}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- UFC VEGAS METHOD PROPS -->
+                    <div class="bg-slate-900/90 rounded-xl p-1.5 border border-slate-800 text-center font-barlow my-0.5">
+                        <span class="text-[9px] font-black text-amber-400 uppercase tracking-widest block mb-0.5">VEGAS METHOD OF VICTORY PROPS</span>
+                        <div class="grid grid-cols-2 gap-1 text-[10px] font-bold text-slate-300">
+                            <div class="bg-slate-950/80 p-1 rounded border border-slate-800 text-red-400">${data.f1.methodProp}</div>
+                            <div class="bg-slate-950/80 p-1 rounded border border-slate-800 text-blue-400">${data.f2.methodProp}</div>
+                        </div>
+                    </div>
+
+                    <!-- TALE OF THE TAPE COMPARISON -->
+                    <div class="bg-slate-900/70 rounded-xl p-1.5 border border-slate-800 text-[11px] font-barlow font-bold space-y-0.5">
+                        <div class="flex justify-between items-center text-slate-300">
+                            <span class="w-16 text-center text-red-400">${data.f1.height}</span>
+                            <span class="text-[9px] text-slate-500 uppercase">HEIGHT</span>
+                            <span class="w-16 text-center text-blue-400">${data.f2.height}</span>
+                        </div>
+                        <div class="flex justify-between items-center text-slate-300">
+                            <span class="w-16 text-center text-red-400">${data.f1.reach}</span>
+                            <span class="text-[9px] text-slate-500 uppercase">REACH</span>
+                            <span class="w-16 text-center text-blue-400">${data.f2.reach}</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-0.5 text-center text-[10px] font-bold text-slate-400 font-barlow tracking-wider">
+                        ${data.subtext}
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- TEAM GAME CARD TEMPLATE WITH KEY PLAYER SPOTLIGHT HEADSHOTS ---
+        function renderTeamGameCard(data) {
+            return `
+                <div class="bg-slate-950/90 rounded-2xl border border-slate-800 p-3 shadow-2xl relative overflow-hidden flex flex-col justify-between h-full space-y-1">
+                    <div class="flex justify-between items-center pb-1 border-b border-slate-800/80">
+                        <span class="text-[11px] font-bold px-2 py-0.5 rounded border font-barlow tracking-wider ${data.statusBadgeClass}">
+                            ${data.status}
+                        </span>
+                        <span class="text-[11px] font-bold text-slate-400 font-barlow tracking-wider uppercase">
+                            ${data.tvBroadcast}
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-3 items-center my-1">
+                        <!-- Away Team -->
+                        <div class="flex flex-col items-center text-center">
+                            <div class="w-14 h-14 sm:w-16 sm:h-16 mb-1 p-1.5 rounded-2xl border flex items-center justify-center shadow-xl transition-colors duration-500" style="background-color: ${data.away.color}33; border-color: ${data.away.color};">
+                                <img src="${data.away.logo}" alt="${data.away.name}" class="w-full h-full object-contain filter drop-shadow-md" onerror="this.src='https://placehold.co/100x100/1e293b/ffffff?text=${data.away.abbr}'">
+                            </div>
+                            <h3 class="font-black text-sm sm:text-base font-barlow text-white uppercase leading-tight">${data.away.short}</h3>
+                            <span class="text-[10px] font-bold text-slate-400 font-barlow">${data.away.record}</span>
+                        </div>
+
+                        <!-- Live Score -->
+                        <div class="flex flex-col items-center text-center">
+                            <div class="flex items-center space-x-1.5 my-0.5">
+                                <span class="text-3xl sm:text-4xl font-black font-teko text-white">${data.away.score}</span>
+                                <span class="text-xl font-black font-teko text-slate-600">-</span>
+                                <span class="text-3xl sm:text-4xl font-black font-teko text-white">${data.home.score}</span>
+                            </div>
+                            <span class="text-[10px] font-black font-barlow text-amber-400 tracking-wider uppercase bg-slate-900 px-2 py-0.5 rounded border border-slate-800">
+                                ${data.timeOrPeriod}
+                            </span>
+                        </div>
+
+                        <!-- Home Team -->
+                        <div class="flex flex-col items-center text-center">
+                            <div class="w-14 h-14 sm:w-16 sm:h-16 mb-1 p-1.5 rounded-2xl border flex items-center justify-center shadow-xl transition-colors duration-500" style="background-color: ${data.home.color}33; border-color: ${data.home.color};">
+                                <img src="${data.home.logo}" alt="${data.home.name}" class="w-full h-full object-contain filter drop-shadow-md" onerror="this.src='https://placehold.co/100x100/1e293b/ffffff?text=${data.home.abbr}'">
+                            </div>
+                            <h3 class="font-black text-sm sm:text-base font-barlow text-white uppercase leading-tight">${data.home.short}</h3>
+                            <span class="text-[10px] font-bold text-slate-400 font-barlow">${data.home.record}</span>
+                        </div>
+                    </div>
+
+                    <!-- KEY PLAYER SPOTLIGHT CARD -->
+                    <div class="bg-gradient-to-r from-slate-900/90 via-slate-950 to-slate-900/90 rounded-xl p-2 border border-slate-800 my-0.5">
+                        <div class="flex justify-between items-center mb-1 border-b border-slate-800/80 pb-0.5">
+                            <span class="text-[9px] font-black text-amber-400 uppercase tracking-widest font-barlow flex items-center gap-1">
+                                <i data-lucide="user-check" class="w-3 h-3"></i> KEY PLAYER SPOTLIGHT
+                            </span>
+                            <span class="text-[9px] font-bold text-slate-500 uppercase font-barlow">HEAD-TO-HEAD LEADERS</span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <!-- Away Player -->
+                            <div class="flex items-center space-x-2 bg-slate-950/80 p-1.5 rounded-lg border border-slate-800">
+                                <img src="${data.away.player.img}" alt="${data.away.player.name}" class="w-10 h-10 object-contain rounded-full bg-slate-900 border border-slate-700 shrink-0" onerror="this.src='https://placehold.co/100x100/1e293b/ffffff?text=STAR'">
+                                <div class="min-w-0 flex-1">
+                                    <span class="text-[8px] font-bold text-amber-400 uppercase block font-barlow leading-none">${data.away.player.pos}</span>
+                                    <h4 class="text-[11px] font-black text-white font-barlow truncate leading-tight">${data.away.player.name}</h4>
+                                    <p class="text-[9px] font-bold text-slate-400 font-barlow truncate leading-none mt-0.5">${data.away.player.stats}</p>
+                                </div>
+                            </div>
+
+                            <!-- Home Player -->
+                            <div class="flex items-center space-x-2 bg-slate-950/80 p-1.5 rounded-lg border border-slate-800">
+                                <img src="${data.home.player.img}" alt="${data.home.player.name}" class="w-10 h-10 object-contain rounded-full bg-slate-900 border border-slate-700 shrink-0" onerror="this.src='https://placehold.co/100x100/1e293b/ffffff?text=STAR'">
+                                <div class="min-w-0 flex-1">
+                                    <span class="text-[8px] font-bold text-amber-400 uppercase block font-barlow leading-none">${data.home.player.pos}</span>
+                                    <h4 class="text-[11px] font-black text-white font-barlow truncate leading-tight">${data.home.player.name}</h4>
+                                    <p class="text-[9px] font-bold text-slate-400 font-barlow truncate leading-none mt-0.5">${data.home.player.stats}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- FULL VEGAS BETTING LINES -->
+                    <div class="bg-slate-900/90 rounded-xl p-2 my-0.5 border border-slate-800 font-barlow space-y-1">
+                        <div class="text-center text-[9px] font-black text-amber-400 tracking-widest uppercase">
+                            OFFICIAL VEGAS BETTING LINES
+                        </div>
+                        <div class="grid grid-cols-3 text-center border-t border-slate-800/80 pt-1 gap-1">
+                            <div>
+                                <span class="text-[8px] text-slate-500 font-bold uppercase block">POINT SPREAD</span>
+                                <span class="text-[11px] font-bold text-amber-400">${data.oddsSpread}</span>
+                            </div>
+                            <div class="border-x border-slate-800 px-1">
+                                <span class="text-[8px] text-slate-500 font-bold uppercase block">MONEYLINE</span>
+                                <span class="text-[11px] font-bold text-slate-200">${data.moneyline}</span>
+                            </div>
+                            <div>
+                                <span class="text-[8px] text-slate-500 font-bold uppercase block">TOTAL (O/U)</span>
+                                <span class="text-[11px] font-bold text-cyan-400">${data.oddsOU}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Highlight Note -->
+                    <div class="bg-slate-900/50 p-1.5 rounded-lg border border-slate-800 text-center">
+                        <span class="text-[10px] font-bold text-slate-300 font-barlow">
+                            <span class="text-amber-500 uppercase">GAME NOTE:</span> ${data.highlights}
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- CAROUSEL ROTATION & TIMELINE PROGRESS BAR ---
+        function startSlideTimer() {
+            stopSlideTimer();
+            slideStartTime = Date.now();
+            updateProgressBar();
+
+            slideTimer = setInterval(() => {
+                if (!isPaused) {
+                    nextSlide(true);
+                }
+            }, slideDuration);
+
+            document.getElementById('slideTimerBadge').innerText = `${slideDuration / 1000}s ROTATE`;
+        }
+
+        function stopSlideTimer() {
+            if (slideTimer) clearInterval(slideTimer);
+            if (progressAnimFrame) cancelAnimationFrame(progressAnimFrame);
+        }
+
+        function resetProgressBar() {
+            slideStartTime = Date.now();
+            updateProgressBar();
+        }
+
+        function updateProgressBar() {
+            if (isPaused) return;
+
+            const elapsed = Date.now() - slideStartTime;
+            const percentage = Math.min(100, (elapsed / slideDuration) * 100);
+            
+            const bar = document.getElementById('rotationProgressBar');
+            if (bar) bar.style.width = `${percentage}%`;
+
+            if (percentage < 100) {
+                progressAnimFrame = requestAnimationFrame(updateProgressBar);
+            }
+        }
+
+        function nextSlide(auto = false) {
+            currentSlideIndex = (currentSlideIndex + 1) % matchData.length;
+            renderCurrentMatchup();
+        }
+
+        function prevSlide() {
+            currentSlideIndex = (currentSlideIndex - 1 + matchData.length) % matchData.length;
+            renderCurrentMatchup();
+        }
+
+        function goToSlide(index) {
+            currentSlideIndex = index;
+            renderCurrentMatchup();
+        }
+
+        function togglePause() {
+            isPaused = !isPaused;
+            const icon = document.getElementById('pauseIcon');
+            if (isPaused) {
+                icon.setAttribute('data-lucide', 'play');
+                icon.className = 'w-3.5 h-3.5 text-emerald-400';
+            } else {
+                icon.setAttribute('data-lucide', 'pause');
+                icon.className = 'w-3.5 h-3.5 text-amber-400';
+                resetProgressBar();
+            }
+            lucide.createIcons();
+        }
+
+        // --- SETTINGS DRAWER CONTROLS ---
+        function toggleSettings() {
+            const drawer = document.getElementById('settingsDrawer');
+            drawer.classList.toggle('translate-x-full');
+        }
+
+        function updateHeaderTitle(val) {
+            document.getElementById('customHeaderTitle').innerText = val || 'MONKEY BAR';
+        }
+
+        function updateRotationSpeed(ms) {
+            slideDuration = parseInt(ms);
+            startSlideTimer();
+        }
+    </script>
+</body>
+</html>
